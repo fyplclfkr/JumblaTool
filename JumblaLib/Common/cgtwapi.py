@@ -59,7 +59,7 @@ def get_my_task(db):
                                    'task.expected_time', 'task.total_use_time', 'task.status', 'task.module',
                                    'task.link_id', 'task.id']
                 # field_sign_list = t_tw.task.fields(db, module)
-                filter_list = [['task.account', '=', USER_NAME]]
+                filter_list = [['task.account', 'has', USER_NAME]]
                 id_list = cgtw2.tw().task.get_id(
                     db, module, filter_list, limit="5000", start_num="")
                 task_list = cgtw2.tw().task.get(
@@ -70,7 +70,7 @@ def get_my_task(db):
                                    'task.expected_time', 'task.total_use_time', 'task.status', 'task.module',
                                    'task.link_id', 'task.id']
                 # field_sign_list = t_tw.task.fields(db, module)
-                filter_list = [['task.account', '=', USER_NAME]]
+                filter_list = [['task.account', 'has', USER_NAME]]
                 id_list = cgtw2.tw().task.get_id(db, module, filter_list, limit="5000", start_num="")
                 task_list = cgtw2.tw().task.get(db, module, id_list, field_sign_list, limit="5000", order_sign_list=[])
                 _task_list.extend(task_list)

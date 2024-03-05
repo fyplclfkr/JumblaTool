@@ -31,7 +31,7 @@ def count_working_hours(clock_in_time: QTime, last_time: QTime, start_time: QTim
     # 减去休息时间
     if start_time.hour() < 12 and end_time.hour() >= 13:
         seconds_diff -= 3600
-    elif start_time.hour() >= 12 and end_time.hour() >= 13:
+    elif start_time.hour() == 12 and end_time.hour() >= 13:
         seconds_diff -= start_time.minute() * 60
     time_diff = QTime(0, 0).addSecs(seconds_diff)
     formatted_time_diff = time_diff.toString('hh:mm')

@@ -407,7 +407,9 @@ class TimeLogInterface(QWidget):
                                      self.window())
             if w.exec_():
                 # 提交工时
-                _dict['text'] = w.textLineEdit.toPlainText()
+                _remarks = w.textLineEdit.toPlainText()
+                if _remarks:
+                    _dict['text'] = _remarks
                 print(cgtwapi.sub_time_log(_dict))
                 InfoBar.success(
                     title='工时提交成功',
