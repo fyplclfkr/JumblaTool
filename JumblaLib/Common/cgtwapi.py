@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 import json
+import sys
 from datetime import date
+from PyQt5.QtCore import QTime
 
-from .cgtw import cgtw2
+sys.path.append(r'\\nas01\shares\dev\cgtw\base')
+import cgtw2
+
 USER_NAME = ''
 USER_ID = ''
 ACCOUNT_LIST = {}
@@ -83,7 +87,8 @@ def get_daily_timelog(_date):
         _project = get_project_list()
         for i in _project:
             db = i['project.database']
-            field_list = ['date', 'tag', 'artist', 'project', 'link_entity', 'text', 'start_time', 'end_time', 'use_time']
+            field_list = ['date', 'tag', 'artist', 'project', 'link_entity', 'text', 'start_time', 'end_time',
+                          'use_time']
             # field_list = t_tw.timelog.fields()
             # field_list.extend(['tag'])
             filter_list = [['account_id', '=', USER_ID], ['date', 'start', _date]]
@@ -111,8 +116,28 @@ def get_clock_in_time(user_name):
     except:
         return None
 
+
 def sub_time_log(_dict):
     try:
-        cgtw2.tw().timelog.create(_dict['db'], _dict['link_id'], _dict['module'], _dict['module_type'], _dict['use_time'], _dict['date'], _dict['text'], _dict['tag'])
+        _timelog_id = cgtw2.tw().timelog.create(_dict['db'], _dict['link_id'], _dict['module'], _dict['module_type'],
+                                                _dict['use_time'], _dict['date'], _dict['text'], tag='')
+
+        return cgtw2.tw().timelog.set(_dict['db'], _timelog_id,
+                                      {'start_time': _dict['start_time'], 'end_time': _dict['end_time']})
     except Exception as e:
         print(e)
+
+
+def reload_task_info(db, module, id):
+    if module == 'shot':
+        field_sign_list = ['shot.entity', 'task.account', 'task.artist', 'task.entity', 'task.url',
+                           'task.expected_time', 'task.total_use_time', 'task.status', 'task.module', 'task.link_id',
+                           'task.id']
+        task = cgtw2.tw().task.get(db, module, id, field_sign_list, limit="5000", order_sign_list=[])
+        return task
+    elif module == 'asset':
+        field_sign_list = ['asset.entity', 'task.account', 'task.artist', 'task.entity', 'task.url',
+                           'task.expected_time', 'task.total_use_time', 'task.status', 'task.module', 'task.link_id',
+                           'task.id']
+        task = cgtw2.tw().task.get(db, module, id, field_sign_list, limit="5000", order_sign_list=[])
+        return task

@@ -2,7 +2,7 @@
 import sys
 
 from PyQt5.QtCore import Qt, QTime, pyqtSlot
-from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QHBoxLayout, QSpacerItem, QSizePolicy
 from qfluentwidgets import PrimaryPushButton, TitleLabel, TimePicker, SubtitleLabel, BodyLabel, Slider
 
 
@@ -14,6 +14,7 @@ class SubTimelogCard(QWidget):
         self._init_ui()
 
     def _init_ui(self):
+
         self.start_time_label = BodyLabel()
         self.start_time_label.setText('开始时间')
         self.start_time_picker = TimePicker()
@@ -29,11 +30,13 @@ class SubTimelogCard(QWidget):
         self.add_1H_button = PrimaryPushButton('+1H')
         self.add_2H_button = PrimaryPushButton('+2H')
 
+        self.time_slider = Slider(Qt.Horizontal)
+
         self.submit_button = PrimaryPushButton()
         self.submit_button.setText('提交工时')
         self.submit_button.setMinimumHeight(40)
 
-        self.time_slider = Slider(Qt.Horizontal)
+        self.spacer = QSpacerItem(10, 10, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self._init_layout()
         self._init_style()
@@ -47,22 +50,23 @@ class SubTimelogCard(QWidget):
         self.layout.setVerticalSpacing(12)
         self.layout.setHorizontalSpacing(12)
 
-        self.layout.addWidget(self.start_time_label, 0, 0)
-        self.layout.addWidget(self.start_time_picker, 0, 1, 1, self.layout.columnCount())
+        self.layout.addWidget(self.start_time_label, self.layout.rowCount(), 0)
+        self.layout.addWidget(self.start_time_picker, self.layout.rowCount()-1, 1, 1, self.layout.columnCount())
 
-        self.layout.addWidget(self.end_time_label, 1, 0)
-        self.layout.addWidget(self.end_time_picker, 1, 1)
+        self.layout.addWidget(self.end_time_label, self.layout.rowCount(), 0)
+        self.layout.addWidget(self.end_time_picker, self.layout.rowCount()-1, 1)
 
         self.add_button_layout = QHBoxLayout()
         self.add_button_layout.addWidget(self.now_button)
         self.add_button_layout.addWidget(self.add_30min_button)
         self.add_button_layout.addWidget(self.add_1H_button)
         self.add_button_layout.addWidget(self.add_2H_button)
-        self.layout.addLayout(self.add_button_layout, 2, 0, 1, self.layout.columnCount())
+        self.layout.addLayout(self.add_button_layout, self.layout.rowCount(), 0, 1, self.layout.columnCount())
 
-        self.layout.addWidget(self.time_slider, 3, 0, 1, self.layout.columnCount())
+        self.layout.addWidget(self.time_slider, self.layout.rowCount(), 0, 1, self.layout.columnCount())
 
         self.layout.addWidget(self.submit_button, self.layout.rowCount(), 0, 1, self.layout.columnCount())
+        self.layout.addItem(self.spacer, self.layout.rowCount(), 0, 1, self.layout.columnCount())
 
     def _connect_slot(self):
         self.now_button.clicked.connect(self.on_now_button_clicked)

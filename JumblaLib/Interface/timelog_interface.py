@@ -8,6 +8,7 @@ from qfluentwidgets import ListWidget, InfoBar, InfoBarPosition, setStyleSheet, 
 from JumblaLib.Common.thread import GetProjectThread, GetTasksThread
 from JumblaLib.Widget.timelog_interface import TaskInfoCard, SubTimelogCard, Header, ConfirmTimelogDialog
 from JumblaLib.Common import cgtwapi
+from JumblaLib.Common.jumblaLib import count_working_hours
 
 
 class TimeLogInterface(QWidget):
@@ -77,6 +78,7 @@ class TimeLogInterface(QWidget):
         self.body_left_Layout.addLayout(self.project_task_Layout)
 
         self.body_middle_Layout = QVBoxLayout()
+        self.body_middle_Layout.setSpacing(24)
         self.body_middle_Layout.setContentsMargins(24, 24, 24, 24)
         self.body_middle_Layout.addWidget(self.task_info_label)
         self.body_middle_Layout.addWidget(self.task_info_card)
@@ -210,10 +212,11 @@ class TimeLogInterface(QWidget):
     def set_time_picker(self):
         # 设置时间选择器
         _clock_in_time = cgtwapi.get_clock_in_time(cgtwapi.ACCOUNT_LIST.get('account.name'))  # 获取当天打卡时间
-        _daily_timelog = cgtwapi.get_daily_timelog(date.today().strftime("%Y-%m-%d"))    # 当日工时记录
-
+        _daily_timelog = cgtwapi.get_daily_timelog(date.today().strftime("%Y-%m-%d"))  # 当日工时记录
+        print(f'上班时间: {_clock_in_time} {_daily_timelog}')
         # 上班打卡，未提交当日工时，开始时间设置成当天打卡时间
         if _clock_in_time and not _daily_timelog:
+            self.header.clockInTimeLabel.setText(_clock_in_time)
             self.chose_time_card.start_time_picker.setTime(QTime.fromString(_clock_in_time, 'hh:mm'))
             self.set_chose_time_card_statu(True)
             self.chose_time_card.submit_button.setToolTip('')
@@ -227,11 +230,19 @@ class TimeLogInterface(QWidget):
             # 提取QTime只保留小时分钟
             _time_only = _end_time_dt.time()
             _end_time = QTime(_time_only.hour(), _time_only.minute())
+            self.header.clockInTimeLabel.setText(_clock_in_time)
+            self.header.lastTimeLabel.setText(_end_time.toString('HH:mm'))
             self.chose_time_card.start_time_picker.setTime(_end_time)
             self.set_chose_time_card_statu(True)
             self.chose_time_card.submit_button.setToolTip('')
             self.chose_time_card.end_time_picker.setTime(self.chose_time_card.start_time_picker.getTime())
+            _today_use_time = 0
+            # 获取当天总工时
+            for item in _daily_timelog:
+                _today_use_time += int(item['use_time'])
+            self.header.todayTimeLabel.setText("{:.1f}".format(_today_use_time / 3600))
         else:
+            self.header.clockInTimeLabel.setText('未打卡')
             self.set_chose_time_card_statu(False)
             self.chose_time_card.submit_button.setToolTip('无法提交请刷新')
             InfoBar.error(
@@ -277,10 +288,14 @@ class TimeLogInterface(QWidget):
         self.task_info_card.residue_time_label.setText(' ')
 
     def on_submit_button_clicked(self):
+        _last_time = QTime()
+        _clock_in_time = QTime.fromString(self.header.clockInTimeLabel.text(), 'HH:mm')
+        if self.header.lastTimeLabel.text() != '未提交':
+            _last_time = QTime.fromString(self.header.lastTimeLabel.text(), 'HH:mm')
         _start = self.chose_time_card.start_time_picker.getTime()
         _end = self.chose_time_card.end_time_picker.getTime()
         _now = QDateTime.currentDateTime().time()
-        print(_start, _end)
+        print(_start, _end, _last_time)
         if _end > _now:
             InfoBar.error(
                 title='结束时间未到，请重新设置',
@@ -303,6 +318,50 @@ class TimeLogInterface(QWidget):
                 parent=self
             )
             return
+        if _start < _clock_in_time:
+            InfoBar.error(
+                title='开始时间小于上班时间，请重新设置',
+                content='',
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP,
+                duration=3000,
+                parent=self
+            )
+            return
+        if _start < _last_time:
+            InfoBar.error(
+                title='开始时间小于最后打卡时间，请重新设置',
+                content='',
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP,
+                duration=3000,
+                parent=self
+            )
+            return
+        if _start >= QTime(12, 0) and _end <= QTime(13, 0):
+            InfoBar.error(
+                title='休息时间禁止提交工时',
+                content='',
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP,
+                duration=3000,
+                parent=self
+            )
+            return
+        if _start >= QTime(18, 30) and _end <= QTime(19, 0):
+            InfoBar.error(
+                title='休息时间禁止提交工时',
+                content='',
+                orient=Qt.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP,
+                duration=3000,
+                parent=self
+            )
+            return
         try:
             _db = self.project_ListWidget.currentItem().data(Qt.UserRole)['project.database']
         except:
@@ -317,20 +376,19 @@ class TimeLogInterface(QWidget):
         except:
             _link_id = ''
         # 计算本次工时
-        seconds_diff = _start.secsTo(_end)
-        time_diff = QTime(0, 0).addSecs(seconds_diff)
-        formatted_time_diff = time_diff.toString('hh:mm')
+        # seconds_diff = _start.secsTo(_end)
+        # time_diff = QTime(0, 0).addSecs(seconds_diff)
+        # formatted_time_diff = time_diff.toString('hh:mm')
+        formatted_time_diff = count_working_hours(_clock_in_time, _last_time, _start, _end)
         # 格式化起始时间
         _start_time = datetime.combine(datetime.now(), _start.toPyTime()).strftime("%Y-%m-%d %H:%M:%S")
         _end_time = datetime.combine(datetime.now(), _end.toPyTime()).strftime("%Y-%m-%d %H:%M:%S")
-        _text = f'start_time: {_start_time}\nend_time: {_end_time}'
-        print(_text)
+        # _text = f'start_time: {_start_time}\nend_time: {_end_time}'
         _dict = {'db': _db, 'link_id': _link_id,
                  'module': _module, 'module_type': _module_type,
                  'use_time': formatted_time_diff,
                  'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                 'text': _text, 'tag': '工具提交'}
-        print(_dict)
+                 'start_time': _start_time, 'end_time': _end_time, 'text': '工具提交'}
         if any(value == '' for value in _dict.values()):
             InfoBar.warning(
                 title='请先选择项目|任务|打卡时间',
@@ -348,7 +406,8 @@ class TimeLogInterface(QWidget):
             w = ConfirmTimelogDialog(_projectName, _taskName, _start_time, _end_time, formatted_time_diff,
                                      self.window())
             if w.exec_():
-                cgtwapi.sub_time_log(_dict)
+                # 提交工时
+                print(cgtwapi.sub_time_log(_dict))
                 InfoBar.success(
                     title='工时提交成功',
                     content='',
@@ -358,6 +417,32 @@ class TimeLogInterface(QWidget):
                     duration=2000,
                     parent=self
                 )
+                # 刷新任务信息，总工时
+                task = cgtwapi.reload_task_info(_db, _module, _link_id.split())[0]
+                print(task)
+                if task['task.expected_time']:
+                    _expectedtime = float(task['task.expected_time'])
+                else:
+                    _expectedtime = 0
+                if task['task.total_use_time']:
+                    _usetime = float(task['task.total_use_time'])
+                else:
+                    _usetime = 0
+
+                _residuetime = _expectedtime - _usetime
+                if _residuetime < 0:
+                    self.task_info_card.residue_time_label.setStyleSheet('color: red;')
+                else:
+                    self.task_info_card.residue_time_label.setStyleSheet('color: rgba(51, 51, 51, 0.5);')
+                self.task_info_card.project_name_label.setText(self.project_ListWidget.currentItem().text())
+                self.task_info_card.task_name_label.setText(self.task_ListWidget.currentItem().data(Qt.UserRole)['task.url'])
+                self.task_info_card.task_statu_label.setText(self.task_ListWidget.currentItem().data(Qt.UserRole)['task.status'])
+                self.task_info_card.expected_time_label.setText(str(_expectedtime))
+                self.task_info_card.use_time_label.setText(str(_usetime))
+                self.task_info_card.residue_time_label.setText(str(_residuetime))
+                self.task_ListWidget.currentItem().setData(Qt.UserRole, task)
+                self.set_time_picker()
+                self.set_time_slider()
             else:
                 InfoBar.info(
                     title='取消提交',

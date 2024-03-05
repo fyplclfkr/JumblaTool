@@ -1,12 +1,11 @@
 <RCC>
-  <qresource prefix="/">
+  <qresource prefix="jumbla">
     <file>images/logo.ico</file>
     <file>images/logo.png</file>
     <file>images/logol.png</file>
     <file>images/star.png</file>
     <file>images/success.png</file>
     <file>images/working.png</file>
-
     <file>qss/timelog_interface.qss</file>
   </qresource>
 </RCC>
