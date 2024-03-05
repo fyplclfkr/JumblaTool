@@ -21,7 +21,7 @@ class MainWindow(FluentWindow):
         # 定时更新检测
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_update)
-        self.timer.start(1800000)
+        self.timer.start(60000)
 
         self.timelogPage = TimeLogInterface()
         self.settingPage = SettingInterface()
