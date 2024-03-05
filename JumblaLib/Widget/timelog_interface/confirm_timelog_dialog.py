@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGridLayout, QFrame
-from qfluentwidgets import MessageBoxBase, SubtitleLabel, BodyLabel, StrongBodyLabel
+from qfluentwidgets import MessageBoxBase, SubtitleLabel, BodyLabel, StrongBodyLabel, PlainTextEdit
 
 
 class ConfirmTimelogDialog(MessageBoxBase):
@@ -28,6 +28,10 @@ class ConfirmTimelogDialog(MessageBoxBase):
 
         self.timeLabel = StrongBodyLabel('本次用时：')
         self.useTimeLabel = BodyLabel(useTime)
+        
+        self.textLabel = StrongBodyLabel('备注：')
+        self.textLineEdit = PlainTextEdit()
+        self.textLineEdit.setPlaceholderText('非项目工时请填写备注')
 
         # 将组件添加到布局中
         self.viewLayout.addWidget(self.titleLabel)
@@ -45,6 +49,8 @@ class ConfirmTimelogDialog(MessageBoxBase):
         self.bodyLayout.addWidget(self.endTimeLabel, 3, 1)
         self.bodyLayout.addWidget(self.timeLabel, 4, 0)
         self.bodyLayout.addWidget(self.useTimeLabel, 4, 1)
+        self.bodyLayout.addWidget(self.textLabel, 5, 0)
+        self.bodyLayout.addWidget(self.textLineEdit, 6, 0, 1, -1)
 
         # 设置样式
         # self.titleLabel.setStyleSheet('background: blue')

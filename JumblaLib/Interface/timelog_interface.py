@@ -388,7 +388,7 @@ class TimeLogInterface(QWidget):
                  'module': _module, 'module_type': _module_type,
                  'use_time': formatted_time_diff,
                  'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                 'start_time': _start_time, 'end_time': _end_time, 'text': '工具提交'}
+                 'start_time': _start_time, 'end_time': _end_time, 'text': '项目工时'}
         if any(value == '' for value in _dict.values()):
             InfoBar.warning(
                 title='请先选择项目|任务|打卡时间',
@@ -407,6 +407,7 @@ class TimeLogInterface(QWidget):
                                      self.window())
             if w.exec_():
                 # 提交工时
+                _dict['text'] = w.textLineEdit.toPlainText()
                 print(cgtwapi.sub_time_log(_dict))
                 InfoBar.success(
                     title='工时提交成功',
@@ -444,6 +445,7 @@ class TimeLogInterface(QWidget):
                 self.set_time_picker()
                 self.set_time_slider()
             else:
+                # print(w.textLineEdit.toPlainText())
                 InfoBar.info(
                     title='取消提交',
                     content='',
