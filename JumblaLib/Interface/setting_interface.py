@@ -90,7 +90,7 @@ class SettingInterface(ScrollArea):
                     isClosable=True,
                     position=InfoBarPosition.TOP,
                     duration=2000,
-                    parent=self
+                    parent=self.window()
                 )
         else:
             InfoBar.info(
@@ -100,5 +100,5 @@ class SettingInterface(ScrollArea):
                 isClosable=True,
                 position=InfoBarPosition.TOP,
                 duration=2000,
-                parent=self
+                parent=self.window()
             )
