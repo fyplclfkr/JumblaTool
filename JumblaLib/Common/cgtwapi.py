@@ -4,7 +4,7 @@ import sys
 from datetime import date
 from PyQt5.QtCore import QTime
 
-sys.path.append(r'\\nas01\shares\dev\cgtw\base')
+sys.path.append(r'C:\CgTeamWork_v7\bin\base')
 import cgtw2
 
 USER_NAME = ''
@@ -16,7 +16,7 @@ try:
     USER_NAME = cgtw2.tw().login.account()
     USER_ID = cgtw2.tw().login.account_id()
     ACCOUNT_LIST = cgtw2.tw().account.get([USER_ID], cgtw2.tw().account.fields(), limit='5000', order_sign_list=[])[0]
-
+    
     ip_address = cgtw2.tw().login.http_server_ip().split(':')[0]
     image_info = json.loads(ACCOUNT_LIST[0]['account.image'])
     min_image_url = image_info[0]['min']

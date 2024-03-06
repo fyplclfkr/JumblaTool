@@ -17,6 +17,7 @@ class MainWindow(FluentWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.init_window()
+        self.check_update()
 
         # 定时更新检测
         self.timer = QTimer()
