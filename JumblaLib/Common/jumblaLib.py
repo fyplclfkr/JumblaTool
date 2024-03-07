@@ -18,7 +18,7 @@ def calculateWorkingTime(start_time: QTime, end_time: QTime):
         if end_time.hour() != 13 or end_time.minute() != 0:
             totalSeconds -= 3600
     # 开始时间12点后13点前
-    elif start_time.hour() == 12 and start_time.minute() > 0 and end_time.hour() == 13:
+    elif start_time.hour() == 12 and start_time.minute() >= 0 and end_time.hour() == 13:
         minutesRemove = (60 - start_time.minute()) + end_time.minute()
         totalSeconds -= minutesRemove * 60
 
@@ -30,7 +30,9 @@ def count_working_hours(clock_in_time: QTime, last_time: QTime, start_time: QTim
     seconds_diff = start_time.secsTo(end_time)
     # 减去休息时间
     if start_time.hour() < 12 and end_time.hour() >= 13:
-        seconds_diff -= 3600
+        seconds_diff -= 3600 
+    elif start_time.hour() < 12 and end_time.hour() == 12 and end_time.minute() > 0:
+        seconds_diff -= end_time.minute() * 60
     elif start_time.hour() == 12 and end_time.hour() >= 13:
         seconds_diff -= start_time.minute() * 60
     time_diff = QTime(0, 0).addSecs(seconds_diff)
