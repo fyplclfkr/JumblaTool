@@ -2,7 +2,7 @@
 from PyQt5.QtGui import QColor, QIcon
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QApplication
-from qfluentwidgets import FluentWindow, NavigationItemPosition, qconfig, InfoBarPosition, InfoBar
+from qfluentwidgets import FluentWindow, NavigationItemPosition, qconfig, InfoBarPosition, InfoBar, MSFluentWindow
 from qfluentwidgets import FluentIcon as FIF
 
 from JumblaLib.Common.jumblaLib import get_remote_version, update

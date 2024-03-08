@@ -3,6 +3,7 @@ import json
 import sys
 from datetime import date
 from PyQt5.QtCore import QTime
+from datetime import datetime
 
 sys.path.append(r'C:\CgTeamWork_v7\bin\base')
 import cgtw2
@@ -95,6 +96,7 @@ def get_daily_timelog(_date):
             # filter_list = [['account_id', '=', userid]]
             id_list = cgtw2.tw().timelog.get_id(db, filter_list, limit="5000")
             _time_log.extend(cgtw2.tw().timelog.get(db, id_list, field_list, limit="5000", order_list=['end_time']))
+        _time_log = sorted(_time_log, key=lambda x: datetime.strptime(x['end_time'], '%Y-%m-%d %H:%M:%S'))
         return _time_log
     except Exception as e:
         print(e)
@@ -103,6 +105,7 @@ def get_daily_timelog(_date):
 
 def get_clock_in_time(user_name):
     outputUrl = r'//nas01/shares/dev/jumbla/attendance/'
+    
     try:
         with open(outputUrl + str(date.today()) + '.json', 'r', encoding='utf-8') as f:
             json_data = json.load(f)

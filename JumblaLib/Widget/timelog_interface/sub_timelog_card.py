@@ -18,7 +18,7 @@ class SubTimelogCard(QWidget):
         self.start_time_label = BodyLabel()
         self.start_time_label.setText('开始时间')
         self.start_time_picker = TimePicker()
-        # self.start_time_picker.setEnabled(False)
+        self.start_time_picker.setEnabled(False)
 
         self.end_time_label = BodyLabel()
         self.end_time_label.setText('结束时间')
